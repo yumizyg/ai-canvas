@@ -54,7 +54,7 @@
 
 ## 2026-06-23 - Docker Compose build fails from non-ASCII BuildKit session header
 
-- Status: pending
+- Status: archived
 - Trigger: Restart through `scripts/start-docker.ps1` failed before creating `ai-canvas-app-1`.
 - Symptom: Docker reports `header key "x-docker-expose-session-sharedkey" contains value with non-printable ASCII characters`.
 - Context: Windows project path contains Chinese characters: `E:\project\画布网页`; Docker Compose attempted Bake/BuildKit build before app container creation.
@@ -69,3 +69,12 @@
 - Context: `Dockerfile`, Next standalone build, Prisma client on `node:20-alpine`.
 - Initial read: The Dockerfile assumed an optional Next `public` directory was always present and did not install OpenSSL before Prisma generation/runtime.
 - Next check: Resolved by adding OpenSSL in the Docker base stage, removing the hard public copy assumption, and verifying Docker app health.
+
+## 2026-06-23 - Seedance succeeded task timed out because video URL was not parsed
+
+- Status: pending
+- Trigger: User reported `火山引擎 Seedance 任务超时：succeeded`.
+- Symptom: Worker saw the Seedance task status become `succeeded`, but the adapter kept polling until timeout because it did not find a video URL in the response shape.
+- Context: `src/lib/providers/volcengine.ts`, Seedance task status response parsing.
+- Initial read: The result URL is likely nested under a field not covered by the current hand-written extractor.
+- Next check: Resolved by adding recursive URL discovery and immediate succeeded-without-url diagnostics.

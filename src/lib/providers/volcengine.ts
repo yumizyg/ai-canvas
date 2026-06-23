@@ -154,6 +154,9 @@ export class VolcengineSeedreamProvider implements ModelProviderAdapter {
           data: Buffer.from(await videoResponse.arrayBuffer())
         };
       }
+      if (["succeeded", "success", "completed", "done"].includes(lastStatus)) {
+        throw new Error(`火山引擎 Seedance 任务已成功，但没有找到视频链接：${summarizeTaskResponse(statusJson)}`);
+      }
       if (["failed", "error", "cancelled", "canceled"].includes(lastStatus)) {
         throw new Error(statusJson.error?.message ?? statusJson.message ?? `火山引擎 Seedance 任务失败：${lastStatus}`);
       }
@@ -201,7 +204,8 @@ function extractVideoUrl(json: VolcengineTaskStatusResponse) {
     json.result?.url,
     extractOutputUrl(json.output),
     extractOutputUrl(json.data?.output),
-    extractOutputUrl(json.result?.output)
+    extractOutputUrl(json.result?.output),
+    ...findUrlsDeep(json)
   ];
   return candidates.find((value): value is string => Boolean(value));
 }
@@ -210,6 +214,28 @@ function extractOutputUrl(output?: string | Array<{ url?: string; video_url?: st
   if (!output) return undefined;
   if (typeof output === "string") return output;
   return output.map((item) => item.video_url ?? item.url).find(Boolean);
+}
+
+function findUrlsDeep(value: unknown): string[] {
+  if (!value) return [];
+  if (typeof value === "string") return /^https?:\/\//i.test(value) ? [value] : [];
+  if (Array.isArray(value)) return value.flatMap((item) => findUrlsDeep(item));
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).flatMap((item) => findUrlsDeep(item));
+  }
+  return [];
+}
+
+function summarizeTaskResponse(json: VolcengineTaskStatusResponse) {
+  const seen = new WeakSet<object>();
+  return JSON.stringify(json, (_key, value) => {
+    if (typeof value === "string" && value.length > 180) return `${value.slice(0, 180)}...`;
+    if (value && typeof value === "object") {
+      if (seen.has(value)) return "[Circular]";
+      seen.add(value);
+    }
+    return value;
+  }).slice(0, 1200);
 }
 
 function sleep(ms: number) {

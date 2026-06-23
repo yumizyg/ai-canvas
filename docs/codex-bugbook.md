@@ -69,3 +69,11 @@
 - Fix: Clamp Seedream custom sizes to at least 921600 pixels, route `volcengine-seedance` to the Volcengine adapter, and normalize Seedance model IDs to dated endpoint IDs.
 - Prevention: Provider routers must include every admin preset slug, and provider-side size validation should mirror upstream minimums.
 - Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, and `docker compose -p ai-canvas ps`.
+
+## 2026-06-23 - Seedance succeeded task lacked parsed video URL
+
+- Symptom: Seedance jobs failed with `任务超时：succeeded`.
+- Cause: The task reached `succeeded`, but the adapter only checked a few fixed URL fields and missed the actual nested video URL.
+- Fix: Added recursive URL discovery across the full task response and immediate diagnostics when a succeeded task still has no URL.
+- Prevention: Async provider status parsers should search nested result payloads, not only top-level fields.
+- Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, and `docker compose -p ai-canvas ps`.
