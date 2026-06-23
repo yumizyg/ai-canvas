@@ -17,6 +17,8 @@ const generationSchema = z.object({
   resolution: z.string().optional(),
   width: z.number().int().positive().optional(),
   height: z.number().int().positive().optional(),
+  duration: z.number().int().positive().optional(),
+  fps: z.number().int().positive().optional(),
   seed: z.number().optional(),
   count: z.number().int().min(1).max(4).default(1),
   referenceAssetId: z.string().optional(),
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
       }
     });
 
-    await getGenerationQueue().add("generate-image" as never, { generationJobId: job.id }, { attempts: 2, backoff: { type: "exponential", delay: 2000 } });
+    await getGenerationQueue().add(model.type === "video" ? "generate-video" : ("generate-image" as never), { generationJobId: job.id }, { attempts: 2, backoff: { type: "exponential", delay: 2000 } });
     return { job: { id: job.id, status: job.status } };
   });
 }

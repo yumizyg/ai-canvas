@@ -16,6 +16,7 @@ export type CanvasNodeData = {
   count?: number;
   assetId?: string;
   assetUrl?: string;
+  assetMimeType?: string;
   jobId?: string;
   jobStatus?: string;
   error?: string;

@@ -12,13 +12,22 @@ export type GenerateImageParams = {
   modelSlug?: string;
 };
 
-export type GeneratedImage = {
+export type GenerateVideoParams = GenerateImageParams & {
+  duration?: number;
+  fps?: number;
+};
+
+export type GeneratedAsset = {
   mimeType: string;
   data: Buffer;
   width?: number;
   height?: number;
 };
 
+export type GeneratedImage = GeneratedAsset;
+export type GeneratedVideo = GeneratedAsset;
+
 export interface ModelProviderAdapter {
   generateImage(params: GenerateImageParams): Promise<GeneratedImage>;
+  generateVideo?(params: GenerateVideoParams): Promise<GeneratedVideo>;
 }

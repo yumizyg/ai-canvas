@@ -1,4 +1,4 @@
-import type { GenerateImageParams, GeneratedImage, ModelProviderAdapter } from "@/lib/providers/types";
+import type { GenerateImageParams, GeneratedImage, ModelProviderAdapter } from "./types";
 
 export class MockImageProvider implements ModelProviderAdapter {
   async generateImage(params: GenerateImageParams): Promise<GeneratedImage> {

@@ -638,6 +638,7 @@ select:focus {
 }
 
 .preview img,
+.preview video,
 .asset-inspector {
   width: 100%;
   height: 100%;

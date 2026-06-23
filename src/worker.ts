@@ -5,7 +5,7 @@ import { prisma } from "./lib/prisma";
 import { connection } from "./lib/queue";
 import { writeAssetFile } from "./lib/storage";
 import { getProviderAdapter } from "./lib/providers";
-import type { GenerateImageParams } from "./lib/providers/types";
+import type { GenerateImageParams, GenerateVideoParams } from "./lib/providers/types";
 
 const worker = new Worker(
   "generation",
@@ -27,10 +27,13 @@ const worker = new Worker(
 
     try {
       const adapter = getProviderAdapter(job.model.provider);
-      const params = { ...(job.parameters as GenerateImageParams), modelSlug: job.model.slug };
-      const image = await adapter.generateImage(params);
+      const params = { ...(job.parameters as GenerateImageParams | GenerateVideoParams), modelSlug: job.model.slug };
+      const generatedAsset =
+        job.model.type === "video"
+          ? await (adapter.generateVideo ? adapter.generateVideo(params as GenerateVideoParams) : Promise.reject(new Error("当前模型供应商还没有接入视频生成")))
+          : await adapter.generateImage(params as GenerateImageParams);
       const assetId = randomUUID();
-      const filePath = await writeAssetFile(assetId, image.mimeType, image.data);
+      const filePath = await writeAssetFile(assetId, generatedAsset.mimeType, generatedAsset.data);
 
       await prisma.$transaction(async (tx) => {
         const asset = await tx.asset.create({
@@ -38,10 +41,10 @@ const worker = new Worker(
             id: assetId,
             ownerId: job.creatorId,
             sourceJobId: job.id,
-            mimeType: image.mimeType,
+            mimeType: generatedAsset.mimeType,
             filePath,
-            width: image.width,
-            height: image.height
+            width: generatedAsset.width,
+            height: generatedAsset.height
           }
         });
 
@@ -59,6 +62,7 @@ const worker = new Worker(
                 ...((node.data as Record<string, unknown>) ?? {}),
                 assetId: asset.id,
                 assetUrl: `/api/assets/${asset.id}/file`,
+                assetMimeType: generatedAsset.mimeType,
                 jobId: job.id,
                 jobStatus: "succeeded"
               }

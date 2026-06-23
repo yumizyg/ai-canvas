@@ -53,3 +53,11 @@
 - Fix: Added an OpenSSL-equipped Docker base stage, removed the hard public copy, added `public/.gitkeep`, set `HOSTNAME=0.0.0.0`, and changed worker/provider imports to runtime-safe relative paths.
 - Prevention: Verify both `app` and `worker` containers after Compose startup, not just browser HTTP 200.
 - Verification: `npx tsc --noEmit`, `npm test`, `docker compose -p ai-canvas ps`, and `scripts\verify-local-prod.ps1`.
+
+## 2026-06-23 - Canvas generation controls did not match model type
+
+- Symptom: Video nodes had no generation button, and Seedream image output ignored selected aspect ratio.
+- Cause: The canvas submit handler only allowed `imageGen` nodes, while the Seedream adapter prioritized coarse `1K/2K/4K` resolution over the selected pixel size.
+- Fix: Allowed `videoGen` submissions, added Seedance video task handling in the Volcengine adapter/worker, and made Seedream submit `widthxheight` when canvas dimensions are set.
+- Prevention: For every model type exposed in the admin panel, verify there is a matching canvas action and provider worker path.
+- Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, `docker compose -p ai-canvas ps`, and `scripts\verify-local-prod.ps1`.

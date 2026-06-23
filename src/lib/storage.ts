@@ -6,7 +6,17 @@ export function getAssetStorageDir() {
 }
 
 export async function writeAssetFile(id: string, mimeType: string, data: Buffer) {
-  const ext = mimeType.includes("svg") ? "svg" : mimeType.includes("png") ? "png" : mimeType.includes("jpeg") || mimeType.includes("jpg") ? "jpg" : "bin";
+  const ext = mimeType.includes("mp4")
+    ? "mp4"
+    : mimeType.includes("webm")
+      ? "webm"
+      : mimeType.includes("svg")
+        ? "svg"
+        : mimeType.includes("png")
+          ? "png"
+          : mimeType.includes("jpeg") || mimeType.includes("jpg")
+            ? "jpg"
+            : "bin";
   const dir = getAssetStorageDir();
   await mkdir(dir, { recursive: true });
   const filePath = path.join(dir, `${id}.${ext}`);

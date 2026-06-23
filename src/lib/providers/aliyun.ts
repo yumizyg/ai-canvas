@@ -1,4 +1,4 @@
-import type { GenerateImageParams, GeneratedImage, ModelProviderAdapter } from "@/lib/providers/types";
+import type { GenerateImageParams, GeneratedImage, ModelProviderAdapter } from "./types";
 
 type DashScopeTaskResponse = {
   output?: {

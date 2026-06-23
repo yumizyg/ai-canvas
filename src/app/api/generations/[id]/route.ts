@@ -24,6 +24,7 @@ export async function GET(_: Request, context: { params: { id: string } }) {
           ? {
               id: job.resultAsset.id,
               url: `/api/assets/${job.resultAsset.id}/file`,
+              mimeType: job.resultAsset.mimeType,
               width: job.resultAsset.width,
               height: job.resultAsset.height
             }

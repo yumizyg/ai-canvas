@@ -107,6 +107,10 @@ function deriveSize(aspectRatio = "1:1", resolution = "1K") {
   return { width: evenWidth, height: evenHeight, size: `${evenWidth}x${evenHeight}` };
 }
 
+function isVideoAsset(data: CanvasNodeData) {
+  return data.assetMimeType?.startsWith("video/") || /\.(mp4|webm|mov)(\?|$)/i.test(data.assetUrl ?? "");
+}
+
 const initialNodes: CanvasFlowNode[] = [
   {
     id: "prompt-1",
@@ -188,6 +192,7 @@ function ImageGenNode({ data, selected }: NodeProps<Node<CanvasNodeData>>) {
 }
 
 function VideoGenNode({ data, selected }: NodeProps<Node<CanvasNodeData>>) {
+  const running = data.jobStatus === "queued" || data.jobStatus === "running";
   return (
     <div className={clsx("canvas-node gen-node video-node", selected && "selected")}>
       <NodeResizer minWidth={250} minHeight={260} isVisible={selected} />
@@ -200,12 +205,16 @@ function VideoGenNode({ data, selected }: NodeProps<Node<CanvasNodeData>>) {
         <span>{data.label || "视频节点"}</span>
       </div>
       <div className="preview video-preview">
-        <Video size={38} />
-        <span>Seedance 视频配置</span>
+        {data.assetUrl ? <video src={data.assetUrl} controls /> : running ? <Loader2 className="spin" size={34} /> : <Video size={38} />}
+        {data.assetUrl ? (
+          <a className="node-download nodrag" href={data.assetUrl} download title="????">
+            <Download size={14} />
+          </a>
+        ) : null}
       </div>
       <div className="node-meta">
         <span>{data.aspectRatio || "16:9"} · {data.resolution || data.size || "1080p"}</span>
-        <span>{data.duration ?? 5}s</span>
+        <span>{data.jobStatus || `${data.duration ?? 5}s`}</span>
       </div>
       {data.resolvedPrompt ? <p className="node-resolved">已接收提示词：{data.resolvedPrompt.slice(0, 42)}</p> : <p>配置 Seedance 1.0/1.5 Pro。视频生成接口待接入。</p>}
       <div className="node-port-label right">视频输出</div>
@@ -668,19 +677,23 @@ export default function HomePage() {
   };
 
   const runGeneration = async () => {
-    if (!activeCanvas || !selectedNode || selectedNode.type !== "imageGen") return;
-    if (!selectedNode.data.modelId && !models[0]) {
+    if (!activeCanvas || !selectedNode || (selectedNode.type !== "imageGen" && selectedNode.type !== "videoGen")) return;
+    const isVideo = selectedNode.type === "videoGen";
+    const fallbackModel = selectableModels[0];
+    const modelId = selectedNode.data.modelId ?? fallbackModel?.id;
+    if (!modelId) {
       setToast("没有可用模型");
       return;
     }
     setGenerating(true);
     const inputs = resolveGenerationInputs(nodes, edges, selectedNode.id);
     const effectivePrompt = inputs.prompt || selectedNode.data.prompt || "企业内部创意素材";
-    const visualSize = deriveSize(selectedNode.data.aspectRatio ?? "1:1", selectedNode.data.resolution ?? selectedModel?.supportedSizes?.[0] ?? "1K");
-    const effectiveWidth = selectedNode.data.width ?? visualSize.width;
-    const effectiveHeight = selectedNode.data.height ?? visualSize.height;
-    const effectiveSize = selectedNode.data.size ?? `${effectiveWidth}x${effectiveHeight}`;
-    const effectiveResolution = selectedNode.data.resolution ?? selectedModel?.supportedSizes?.[0] ?? "1K";
+    const effectiveAspect = selectedNode.data.aspectRatio ?? (isVideo ? "16:9" : "1:1");
+    const effectiveResolution = selectedNode.data.resolution ?? fallbackModel?.supportedSizes?.[0] ?? (isVideo ? "1080p" : "1K");
+    const visualSize = isVideo ? undefined : deriveSize(effectiveAspect, effectiveResolution);
+    const effectiveWidth = isVideo ? selectedNode.data.width : selectedNode.data.width ?? visualSize?.width ?? 1024;
+    const effectiveHeight = isVideo ? selectedNode.data.height : selectedNode.data.height ?? visualSize?.height ?? 1024;
+    const effectiveSize = isVideo ? effectiveResolution : `${effectiveWidth}x${effectiveHeight}`;
     const preparedNodes = nodes.map((node) =>
       node.id === selectedNode.id
         ? {
@@ -688,7 +701,7 @@ export default function HomePage() {
             data: {
               ...node.data,
               size: effectiveSize,
-              aspectRatio: selectedNode.data.aspectRatio ?? "1:1",
+              aspectRatio: effectiveAspect,
               resolution: effectiveResolution,
               width: effectiveWidth,
               height: effectiveHeight,
@@ -705,14 +718,16 @@ export default function HomePage() {
     const payload = {
       canvasId: activeCanvas.id,
       nodeId: selectedNode.id,
-      modelId: selectedNode.data.modelId ?? models[0]?.id,
+      modelId,
       prompt: effectivePrompt,
       negativePrompt: selectedNode.data.negativePrompt,
       size: effectiveSize,
-      aspectRatio: selectedNode.data.aspectRatio ?? "1:1",
+      aspectRatio: effectiveAspect,
       resolution: effectiveResolution,
       width: effectiveWidth,
       height: effectiveHeight,
+      duration: isVideo ? selectedNode.data.duration ?? 5 : undefined,
+      fps: isVideo ? selectedNode.data.fps ?? 24 : undefined,
       seed: selectedNode.data.seed,
       count: selectedNode.data.count ?? 1,
       referenceAssetId: inputs.referenceAssetId,
@@ -748,7 +763,7 @@ export default function HomePage() {
         const response = await fetch(`/api/generations/${job.id}`);
         if (!response.ok) continue;
         const json = (await response.json()) as {
-          job: { id: string; status: string; error?: string; asset?: { id: string; url: string } | null };
+          job: { id: string; status: string; error?: string; asset?: { id: string; url: string; mimeType?: string; width?: number; height?: number } | null };
         };
         setJobs((current) => current.map((item) => (item.id === job.id ? { ...item, status: json.job.status, error: json.job.error } : item)));
         setNodes((current) =>
@@ -760,6 +775,9 @@ export default function HomePage() {
                     ...node.data,
                     assetId: json.job.asset?.id ?? node.data.assetId,
                     assetUrl: json.job.asset ? `${json.job.asset.url}?t=${Date.now()}` : node.data.assetUrl,
+                    assetMimeType: json.job.asset?.mimeType ?? node.data.assetMimeType,
+                    width: json.job.asset?.width ?? node.data.width,
+                    height: json.job.asset?.height ?? node.data.height,
                     jobStatus: json.job.status,
                     error: json.job.error
                   }
@@ -941,7 +959,7 @@ export default function HomePage() {
               <button onClick={() => addNode("imageGen")}>生图</button>
               <button onClick={() => addNode("videoGen")}>视频</button>
               <button onClick={() => uploadInputRef.current?.click()}>上传素材</button>
-              <button onClick={runGeneration} disabled={selectedNode?.type !== "imageGen" || generating}>
+              <button onClick={runGeneration} disabled={(selectedNode?.type !== "imageGen" && selectedNode?.type !== "videoGen") || generating}>
                 {generating ? "提交中" : "生成"}
               </button>
             </div>
@@ -1148,10 +1166,10 @@ export default function HomePage() {
                   </button>
                 </div>
 
-                <div className="inspector-note">
-                  <strong>视频生成状态</strong>
-                  <span>Seedance 模型已可配置并保存到画布；真实视频生成 worker 还未接入，当前不会提交生成任务。</span>
-                </div>
+                <button className="primary-button" onClick={runGeneration} disabled={generating}>
+                  {generating ? <Loader2 className="spin" size={16} /> : <Play size={16} />}
+                  生成视频
+                </button>
               </>
             )}
             {selectedNode.type === "imageGen" && (
