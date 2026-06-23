@@ -205,12 +205,6 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up -d --bui
 - AI 能力：接入 Seedream / Seedance，处理提示词、参考图、模型 ID、尺寸参数和视频任务轮询。
 - 工程能力：完成前端画布、后端 API、数据库、任务队列、权限系统、Docker 部署和版本回退。
 
-一句话总结：
-
-```text
-我不仅会使用 AI 生成工具，也能把多模型 AIGC 能力产品化，做成一个可部署、可管理、可扩展的企业内部系统。
-```
-
 ## License
 
 Internal project / portfolio demo. Please review model provider terms and company data policy before production use.
