@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+storage/assets/*
+storage/backups/*
+!storage/assets/.gitkeep
+!storage/backups/.gitkeep
+coverage
+logs
+next-build-debug.log
+tsconfig.tsbuildinfo
+npm-debug.log

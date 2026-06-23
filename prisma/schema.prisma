@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  member
+}
+
+enum UserStatus {
+  active
+  disabled
+}
+
+enum ModelType {
+  image
+  video
+}
+
+enum JobStatus {
+  queued
+  running
+  succeeded
+  failed
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  name         String
+  passwordHash String
+  role         UserRole    @default(member)
+  status       UserStatus  @default(active)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  canvases     Canvas[]
+  jobs         GenerationJob[]
+  assets       Asset[]
+}
+
+model ModelProvider {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  enabled     Boolean  @default(true)
+  apiKeyEnv   String?
+  apiKeySecret String?
+  baseUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  models      Model[]
+}
+
+model Model {
+  id            String        @id @default(cuid())
+  providerId    String
+  name          String
+  slug          String        @unique
+  type          ModelType     @default(image)
+  enabled       Boolean       @default(true)
+  supportedSizes Json
+  defaultParams  Json
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  provider      ModelProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  jobs          GenerationJob[]
+}
+
+model Canvas {
+  id        String       @id @default(cuid())
+  title     String
+  ownerId   String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  nodes     CanvasNode[]
+  edges     CanvasEdge[]
+  jobs      GenerationJob[]
+}
+
+model CanvasNode {
+  id        String   @id
+  canvasId  String
+  type      String
+  position  Json
+  size      Json?
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  canvas    Canvas   @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+}
+
+model CanvasEdge {
+  id           String   @id
+  canvasId     String
+  source       String
+  target       String
+  sourceHandle String?
+  targetHandle String?
+  data         Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  canvas       Canvas   @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+}
+
+model GenerationJob {
+  id             String    @id @default(cuid())
+  canvasId       String
+  nodeId         String
+  modelId        String
+  creatorId      String
+  status         JobStatus  @default(queued)
+  parameters     Json
+  error          String?
+  resultAssetId  String?   @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  canvas         Canvas    @relation(fields: [canvasId], references: [id], onDelete: Cascade)
+  model          Model     @relation(fields: [modelId], references: [id])
+  creator        User      @relation(fields: [creatorId], references: [id])
+  resultAsset    Asset?    @relation("JobResult", fields: [resultAssetId], references: [id])
+}
+
+model Asset {
+  id            String         @id @default(cuid())
+  ownerId       String
+  sourceJobId   String?        @unique
+  mimeType      String
+  filePath      String
+  width         Int?
+  height        Int?
+  createdAt     DateTime       @default(now())
+  owner         User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  sourceJob     GenerationJob? @relation("JobResult")
+}
