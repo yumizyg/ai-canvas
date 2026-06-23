@@ -1,0 +1,8 @@
+www.yumiprogram.online {
+  encode gzip zstd
+  reverse_proxy app:3000
+}
+
+yumiprogram.online {
+  redir https://www.yumiprogram.online{uri} permanent
+}

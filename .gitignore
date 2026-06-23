@@ -1,12 +1,14 @@
 node_modules
 .next
 .env
+.env.production
 storage/assets/*
 storage/backups/*
 !storage/assets/.gitkeep
 !storage/backups/.gitkeep
 coverage
 logs
+dist
 next-build-debug.log
 tsconfig.tsbuildinfo
 npm-debug.log
