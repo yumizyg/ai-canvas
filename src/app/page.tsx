@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { KeyRound, Shield, Sparkles } from "lucide-react";
+import { appPath } from "@/lib/app-path";
 
 type SessionUser = { id: string; email: string; name: string; role: "admin" | "member" };
 
@@ -12,10 +13,10 @@ export default function LoginPage() {
   useEffect(() => {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 2500);
-    fetch("/api/auth/me", { cache: "no-store", signal: controller.signal })
+    fetch(appPath("/api/auth/me"), { cache: "no-store", signal: controller.signal })
       .then((res) => res.json())
       .then((data: { user: SessionUser | null }) => {
-        if (data.user) window.location.href = "/canvas";
+        if (data.user) window.location.href = appPath("/canvas");
       })
       .catch(() => undefined)
       .finally(() => window.clearTimeout(timer));
@@ -29,7 +30,7 @@ export default function LoginPage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(appPath("/api/auth/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(login)
@@ -39,12 +40,12 @@ export default function LoginPage() {
       setError(json.message ?? "登录失败");
       return;
     }
-    window.location.href = "/canvas";
+    window.location.href = appPath("/canvas");
   }
 
   return (
     <main className="login-shell">
-      <form className="login-panel" action="/api/auth/login?redirect=/canvas" method="post" onSubmit={submit}>
+      <form className="login-panel" action={appPath("/api/auth/login?redirect=/canvas")} method="post" onSubmit={submit}>
         <div className="brand-mark">
           <Sparkles size={24} />
         </div>

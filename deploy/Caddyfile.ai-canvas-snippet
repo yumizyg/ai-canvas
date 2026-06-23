@@ -1,0 +1,6 @@
+# Add this inside the existing `www.yumiprogram.online` site block that serves
+# your resume website. Do not replace the whole site config with this snippet.
+
+handle /ai-canvas* {
+  reverse_proxy 127.0.0.1:3000
+}

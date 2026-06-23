@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { routeHandler } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
+import { appPath } from "@/lib/app-path";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export async function GET(_: Request, context: { params: { id: string } }) {
         mimeType: asset.mimeType,
         width: asset.width,
         height: asset.height,
-        url: `/api/assets/${asset.id}/file`,
+        url: appPath(`/api/assets/${asset.id}/file`),
         createdAt: asset.createdAt
       }
     };

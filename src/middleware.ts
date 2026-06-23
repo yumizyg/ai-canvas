@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { appPath } from "@/lib/app-path";
 
 const protectedPrefixes = ["/canvas", "/admin"];
 const adminPrefix = "/admin";
@@ -13,7 +14,7 @@ export async function middleware(request: NextRequest) {
 
   const token = request.cookies.get(cookieName)?.value;
   if (!token) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL(appPath("/"), request.url));
   }
 
   try {
@@ -21,11 +22,11 @@ export async function middleware(request: NextRequest) {
     const { payload } = await jwtVerify(token, secret);
     const role = payload.role === "admin" ? "admin" : "member";
     if (pathname.startsWith(adminPrefix) && role !== "admin") {
-      return NextResponse.redirect(new URL("/canvas", request.url));
+      return NextResponse.redirect(new URL(appPath("/canvas"), request.url));
     }
     return NextResponse.next();
   } catch {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL(appPath("/"), request.url));
   }
 }
 

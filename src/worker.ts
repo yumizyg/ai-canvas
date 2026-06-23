@@ -7,6 +7,7 @@ import { connection } from "./lib/queue";
 import { writeAssetFile } from "./lib/storage";
 import { getProviderAdapter } from "./lib/providers";
 import type { GenerateImageParams, GenerateVideoParams } from "./lib/providers/types";
+import { appPath } from "./lib/app-path";
 
 const worker = new Worker(
   "generation",
@@ -69,7 +70,7 @@ const worker = new Worker(
               data: {
                 ...((node.data as Record<string, unknown>) ?? {}),
                 assetId: asset.id,
-                assetUrl: `/api/assets/${asset.id}/file`,
+                assetUrl: appPath(`/api/assets/${asset.id}/file`),
                 assetMimeType: generatedAsset.mimeType,
                 jobId: job.id,
                 jobStatus: "succeeded"

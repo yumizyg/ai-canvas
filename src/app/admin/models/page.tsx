@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Database, EyeOff, Loader2, Save, Settings, Sparkles } from "lucide-react";
+import { appPath } from "@/lib/app-path";
 
 type AdminModel = {
   id: string;
@@ -48,7 +49,7 @@ export default function AdminModelsPage() {
   const [message, setMessage] = useState("不要填写 Doubao-Seedream-4.0 这种展示名；请选择或填写火山方舟实际模型 ID。");
 
   async function load() {
-    const response = await fetch("/api/admin/models");
+    const response = await fetch(appPath("/api/admin/models"));
     if (!response.ok) {
       setMessage("没有权限或登录已过期");
       return;
@@ -77,7 +78,7 @@ export default function AdminModelsPage() {
   async function saveSeedream(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);
-    const response = await fetch("/api/admin/models", {
+    const response = await fetch(appPath("/api/admin/models"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -101,7 +102,7 @@ export default function AdminModelsPage() {
   async function saveSeedance(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);
-    const response = await fetch("/api/admin/models", {
+    const response = await fetch(appPath("/api/admin/models"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

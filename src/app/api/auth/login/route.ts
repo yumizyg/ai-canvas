@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createSession, verifyPassword } from "@/lib/auth";
 import { routeHandler } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
+import { appPath } from "@/lib/app-path";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
       const redirectTo = new URL(request.url).searchParams.get("redirect") ?? "/canvas";
       const protocol = request.headers.get("x-forwarded-proto") ?? "http";
       const host = request.headers.get("host") ?? "127.0.0.1:3000";
-      return NextResponse.redirect(new URL(redirectTo, `${protocol}://${host}`), { status: 303 });
+      return NextResponse.redirect(new URL(appPath(redirectTo), `${protocol}://${host}`), { status: 303 });
     }
 
     return { user: { id: user.id, email: user.email, name: user.name, role: user.role } };

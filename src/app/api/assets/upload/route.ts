@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { routeHandler } from "@/lib/http";
 import { prisma } from "@/lib/prisma";
 import { writeAssetFile } from "@/lib/storage";
+import { appPath } from "@/lib/app-path";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       asset: {
         id: asset.id,
         mimeType: asset.mimeType,
-        url: `/api/assets/${asset.id}/file`,
+        url: appPath(`/api/assets/${asset.id}/file`),
         createdAt: asset.createdAt
       }
     };

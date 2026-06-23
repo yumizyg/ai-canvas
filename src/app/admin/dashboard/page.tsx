@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, BarChart3, Database, Loader2, Settings, UserPlus } from "lucide-react";
+import { appPath } from "@/lib/app-path";
 
 type AdminUser = {
   id: string;
@@ -29,7 +30,7 @@ export default function AdminDashboardPage() {
   const [form, setForm] = useState({ email: "", name: "", password: "", role: "member" as "admin" | "member" });
 
   async function load() {
-    const [statsResponse, usersResponse] = await Promise.all([fetch("/api/admin/stats"), fetch("/api/admin/users")]);
+    const [statsResponse, usersResponse] = await Promise.all([fetch(appPath("/api/admin/stats")), fetch(appPath("/api/admin/users"))]);
     if (!statsResponse.ok || !usersResponse.ok) {
       setMessage("没有权限或登录已过期");
       return;
@@ -49,7 +50,7 @@ export default function AdminDashboardPage() {
   async function createUser(event: React.FormEvent) {
     event.preventDefault();
     setCreating(true);
-    const response = await fetch("/api/admin/users", {
+    const response = await fetch(appPath("/api/admin/users"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form)
@@ -66,7 +67,7 @@ export default function AdminDashboardPage() {
   }
 
   async function updateUser(id: string, patch: Partial<Pick<AdminUser, "role" | "status" | "name">> & { password?: string }) {
-    const response = await fetch(`/api/admin/users/${id}`, {
+    const response = await fetch(appPath(`/api/admin/users/${id}`), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch)

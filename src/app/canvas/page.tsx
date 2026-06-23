@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { resolveGenerationInputs, validateConnection, type CanvasNodeData } from "@/lib/canvas";
+import { appPath } from "@/lib/app-path";
 
 type SessionUser = { id: string; email: string; name: string; role: "admin" | "member" };
 type ModelOption = {
@@ -326,7 +327,7 @@ export default function HomePage() {
   const loadCanvas = useCallback(
     async (canvas: CanvasSummary) => {
       setActiveCanvas(canvas);
-      const response = await fetch(`/api/canvases/${canvas.id}`);
+      const response = await fetch(appPath(`/api/canvases/${canvas.id}`));
       const json = await response.json();
       if (json.canvas?.nodes?.length) {
         setNodes(json.canvas.nodes.map(withNodeDefaults));
@@ -341,7 +342,7 @@ export default function HomePage() {
   );
 
   const loadWorkspace = useCallback(async () => {
-    const [modelsResponse, canvasesResponse] = await Promise.all([fetch("/api/models"), fetch("/api/canvases")]);
+    const [modelsResponse, canvasesResponse] = await Promise.all([fetch(appPath("/api/models")), fetch(appPath("/api/canvases"))]);
     if (!modelsResponse.ok || !canvasesResponse.ok) return;
     const modelsJson = (await modelsResponse.json()) as { models: ModelOption[] };
     const canvasesJson = (await canvasesResponse.json()) as { canvases: CanvasSummary[] };
@@ -350,7 +351,7 @@ export default function HomePage() {
 
     let canvas = canvasesJson.canvases[0];
     if (!canvas) {
-      const created = await fetch("/api/canvases", {
+      const created = await fetch(appPath("/api/canvases"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: "内部 AI 画布" })
@@ -362,7 +363,7 @@ export default function HomePage() {
   }, [loadCanvas]);
 
   useEffect(() => {
-    fetch("/api/auth/me")
+    fetch(appPath("/api/auth/me"))
       .then((res) => res.json())
       .then((data: { user: SessionUser | null }) => {
         setUser(data.user);
@@ -413,7 +414,7 @@ export default function HomePage() {
     async (nextNodes = nodes, nextEdges = edges) => {
       if (!activeCanvas) return false;
       setSaving(true);
-      const response = await fetch(`/api/canvases/${activeCanvas.id}`, {
+      const response = await fetch(appPath(`/api/canvases/${activeCanvas.id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: activeCanvas.title, nodes: nextNodes, edges: nextEdges })
@@ -658,14 +659,14 @@ export default function HomePage() {
   const uploadAsset = async (file: File) => {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await fetch("/api/assets/upload", { method: "POST", body: formData });
+    const response = await fetch(appPath("/api/assets/upload"), { method: "POST", body: formData });
     const json = await response.json();
     if (!response.ok || !json.asset) {
       setToast(json.message ?? "上传失败");
       return;
     }
     if (selectedNode?.type === "asset") {
-      updateSelectedData({ assetId: json.asset.id, assetUrl: `${json.asset.url}?t=${Date.now()}` });
+      updateSelectedData({ assetId: json.asset.id, assetUrl: `${appPath(json.asset.url)}?t=${Date.now()}` });
     } else {
       const id = `asset-${Date.now()}`;
       setNodes((current) => [
@@ -676,7 +677,7 @@ export default function HomePage() {
           position: { x: 220 + current.length * 20, y: 180 + current.length * 18 },
           width: nodeDimensions.asset.width,
           height: nodeDimensions.asset.height,
-          data: { label: file.name, assetId: json.asset.id, assetUrl: `${json.asset.url}?t=${Date.now()}` }
+          data: { label: file.name, assetId: json.asset.id, assetUrl: `${appPath(json.asset.url)}?t=${Date.now()}` }
         }
       ]);
       setSelectedNodeId(id);
@@ -742,7 +743,7 @@ export default function HomePage() {
       referenceAssetUrl: inputs.referenceAssetUrl
     };
 
-    const response = await fetch("/api/generations", {
+    const response = await fetch(appPath("/api/generations"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -768,7 +769,7 @@ export default function HomePage() {
     if (!running.length) return;
     const timer = window.setInterval(async () => {
       for (const job of running) {
-        const response = await fetch(`/api/generations/${job.id}`);
+        const response = await fetch(appPath(`/api/generations/${job.id}`));
         if (!response.ok) continue;
         const json = (await response.json()) as {
           job: { id: string; status: string; error?: string; asset?: { id: string; url: string; mimeType?: string; width?: number; height?: number } | null };
@@ -782,7 +783,7 @@ export default function HomePage() {
                   data: {
                     ...node.data,
                     assetId: json.job.asset?.id ?? node.data.assetId,
-                    assetUrl: json.job.asset ? `${json.job.asset.url}?t=${Date.now()}` : node.data.assetUrl,
+                    assetUrl: json.job.asset ? `${appPath(json.job.asset.url)}?t=${Date.now()}` : node.data.assetUrl,
                     assetMimeType: json.job.asset?.mimeType ?? node.data.assetMimeType,
                     width: json.job.asset?.width ?? node.data.width,
                     height: json.job.asset?.height ?? node.data.height,
@@ -803,7 +804,7 @@ export default function HomePage() {
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();
     setLoginError("");
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(appPath("/api/auth/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(login)
@@ -818,7 +819,7 @@ export default function HomePage() {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch(appPath("/api/auth/logout"), { method: "POST" });
     setUser(null);
   }
 
