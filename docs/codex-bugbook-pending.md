@@ -45,9 +45,27 @@
 
 ## 2026-06-23 - Next startup stalls at Starting after feature changes
 
-- Status: pending
+- Status: archived
 - Trigger: User asked why the canvas sometimes opens and sometimes cannot open after repeated local startup attempts.
 - Symptom: `next build` and `next dev` start Next.js 14.2.20, print environment lines and `Starting...`, then do not reach Ready or emit an actionable error before timeout.
 - Context: local Windows host, `npm run build`, `npx next build --debug`, `npm run dev -- --hostname 0.0.0.0 --port 3000`, Node 24.11.1 and a project-local Node 20.20.2 attempt.
 - Initial read: This is a separate startup/runtime blockage from the earlier cookie/static/login issue; code type checks and unit tests pass, but a fresh Next build/dev server is not becoming ready, so the known-good standalone app cannot be regenerated.
 - Next check: Capture a deeper Next trace or isolate whether a page/module import blocks Next initialization before declaring the local app healthy.
+
+## 2026-06-23 - Docker Compose build fails from non-ASCII BuildKit session header
+
+- Status: pending
+- Trigger: Restart through `scripts/start-docker.ps1` failed before creating `ai-canvas-app-1`.
+- Symptom: Docker reports `header key "x-docker-expose-session-sharedkey" contains value with non-printable ASCII characters`.
+- Context: Windows project path contains Chinese characters: `E:\project\画布网页`; Docker Compose attempted Bake/BuildKit build before app container creation.
+- Initial read: Docker BuildKit/Bake session metadata appears to mishandle non-ASCII path/session values, so this is below the app layer.
+- Next check: Resolved by syncing Docker build context to `C:\Users\27915\.cache\ai-canvas-docker-context` before running Compose.
+
+## 2026-06-23 - Docker image build fails on missing public directory and OpenSSL
+
+- Status: archived
+- Trigger: Docker build progressed after ASCII build-context sync but failed in the runner stage.
+- Symptom: Dockerfile `COPY --from=builder /app/public ./public` failed because `/app/public` did not exist; Prisma also warned and errored around missing OpenSSL libraries in Alpine.
+- Context: `Dockerfile`, Next standalone build, Prisma client on `node:20-alpine`.
+- Initial read: The Dockerfile assumed an optional Next `public` directory was always present and did not install OpenSSL before Prisma generation/runtime.
+- Next check: Resolved by adding OpenSSL in the Docker base stage, removing the hard public copy assumption, and verifying Docker app health.

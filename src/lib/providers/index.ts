@@ -1,8 +1,8 @@
 import type { ModelProvider } from "@prisma/client";
-import type { ModelProviderAdapter } from "@/lib/providers/types";
-import { AliyunWanxProvider } from "@/lib/providers/aliyun";
-import { MockImageProvider } from "@/lib/providers/mock";
-import { VolcengineSeedreamProvider } from "@/lib/providers/volcengine";
+import type { ModelProviderAdapter } from "./types";
+import { AliyunWanxProvider } from "./aliyun";
+import { MockImageProvider } from "./mock";
+import { VolcengineSeedreamProvider } from "./volcengine";
 
 export function getProviderAdapter(provider: Pick<ModelProvider, "slug" | "apiKeyEnv" | "apiKeySecret" | "baseUrl">): ModelProviderAdapter {
   if (provider.slug === "aliyun-dashscope") {

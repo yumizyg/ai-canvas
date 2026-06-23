@@ -1,11 +1,11 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
 import { Worker } from "bullmq";
-import { prisma } from "@/lib/prisma";
-import { connection } from "@/lib/queue";
-import { writeAssetFile } from "@/lib/storage";
-import { getProviderAdapter } from "@/lib/providers";
-import type { GenerateImageParams } from "@/lib/providers/types";
+import { prisma } from "./lib/prisma";
+import { connection } from "./lib/queue";
+import { writeAssetFile } from "./lib/storage";
+import { getProviderAdapter } from "./lib/providers";
+import type { GenerateImageParams } from "./lib/providers/types";
 
 const worker = new Worker(
   "generation",
