@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { Worker } from "bullmq";
 import { prisma } from "./lib/prisma";
 import { connection } from "./lib/queue";
@@ -28,6 +29,13 @@ const worker = new Worker(
     try {
       const adapter = getProviderAdapter(job.model.provider);
       const params = { ...(job.parameters as GenerateImageParams | GenerateVideoParams), modelSlug: job.model.slug };
+      if (params.referenceAssetId) {
+        const referenceAsset = await prisma.asset.findUnique({ where: { id: params.referenceAssetId } });
+        if (referenceAsset?.mimeType.startsWith("image/")) {
+          const data = await readFile(referenceAsset.filePath);
+          params.referenceAssetUrl = `data:${referenceAsset.mimeType};base64,${data.toString("base64")}`;
+        }
+      }
       const generatedAsset =
         job.model.type === "video"
           ? await (adapter.generateVideo ? adapter.generateVideo(params as GenerateVideoParams) : Promise.reject(new Error("当前模型供应商还没有接入视频生成")))

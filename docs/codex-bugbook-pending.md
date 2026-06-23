@@ -70,6 +70,15 @@
 - Initial read: The Dockerfile assumed an optional Next `public` directory was always present and did not install OpenSSL before Prisma generation/runtime.
 - Next check: Resolved by adding OpenSSL in the Docker base stage, removing the hard public copy assumption, and verifying Docker app health.
 
+## 2026-06-23 - Reference image edges do not affect image or video generation
+
+- Status: archived
+- Trigger: User reported that connecting a previous image as reference does not influence the next image/video generation.
+- Symptom: Canvas shows a reference connection, but downstream Seedream/Seedance output ignores the upstream image.
+- Context: `src/lib/canvas.ts`, `src/app/canvas/page.tsx`, `src/worker.ts`, `src/lib/providers/volcengine.ts`.
+- Initial read: The canvas passes `referenceAssetId`, but the worker/provider sends a local relative `/api/assets/...` URL or ignores reference images entirely; external Volcengine APIs need an accessible URL or base64 data URL.
+- Next check: Resolved by converting referenced local image assets to data URLs in the worker and passing them as Seedream `image` / Seedance `image_url` inputs.
+
 ## 2026-06-23 - Seedance succeeded task timed out because video URL was not parsed
 
 - Status: pending

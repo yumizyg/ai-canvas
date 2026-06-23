@@ -8,6 +8,7 @@ export type GenerateImageParams = {
   height?: number;
   seed?: number;
   count?: number;
+  referenceAssetId?: string;
   referenceAssetUrl?: string;
   modelSlug?: string;
 };

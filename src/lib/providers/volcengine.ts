@@ -46,20 +46,25 @@ export class VolcengineSeedreamProvider implements ModelProviderAdapter {
       throw new Error("火山引擎 API Key 未配置");
     }
 
+    const body: Record<string, unknown> = {
+      model: normalizeSeedreamModelId(params.modelSlug),
+      prompt: params.prompt,
+      size: normalizeSeedreamSize(params),
+      response_format: "url",
+      watermark: false,
+      stream: false
+    };
+    if (params.referenceAssetUrl) {
+      body.image = [params.referenceAssetUrl];
+    }
+
     const response = await fetch(this.baseUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: normalizeSeedreamModelId(params.modelSlug),
-        prompt: params.prompt,
-        size: normalizeSeedreamSize(params),
-        response_format: "url",
-        watermark: false,
-        stream: false
-      })
+      body: JSON.stringify(body)
     });
 
     const json = (await response.json()) as VolcengineImageResponse;

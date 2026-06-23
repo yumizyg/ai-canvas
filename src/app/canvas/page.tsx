@@ -436,6 +436,7 @@ export default function HomePage() {
           ? {
               assetId: source.data.assetId,
               assetUrl: source.data.assetUrl,
+              assetMimeType: source.data.assetMimeType,
               resolvedPrompt: source.data.resolvedPrompt ?? source.data.prompt,
               size: source.data.size,
               aspectRatio: source.data.aspectRatio,
@@ -443,7 +444,7 @@ export default function HomePage() {
               width: source.data.width,
               height: source.data.height
             }
-          : { assetId: undefined, assetUrl: undefined, resolvedPrompt: undefined };
+          : { assetId: undefined, assetUrl: undefined, assetMimeType: undefined, resolvedPrompt: undefined };
         const isDifferent = Object.entries(patch).some(([key, value]) => node.data[key as keyof CanvasNodeData] !== value);
         if (!isDifferent) return node;
         changed = true;

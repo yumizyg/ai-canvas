@@ -77,3 +77,11 @@
 - Fix: Added recursive URL discovery across the full task response and immediate diagnostics when a succeeded task still has no URL.
 - Prevention: Async provider status parsers should search nested result payloads, not only top-level fields.
 - Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, and `docker compose -p ai-canvas ps`.
+
+## 2026-06-23 - Reference images were not sent to providers
+
+- Symptom: Connecting an upstream image as a reference did not affect downstream image or video generation.
+- Cause: The canvas passed `referenceAssetId`, but the worker/provider either sent a local relative URL that Volcengine could not access or ignored the reference image entirely for Seedream.
+- Fix: The worker now reads referenced local image assets and converts them to base64 data URLs; Seedream receives them through `image`, and Seedance receives them through `image_url`.
+- Prevention: External providers must receive accessible URLs or inline data, never local app-relative asset URLs.
+- Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, and `docker compose -p ai-canvas ps`.
