@@ -104,7 +104,14 @@ function deriveSize(aspectRatio = "1:1", resolution = "1K") {
   const height = landscape ? Math.round((longEdge * ratio.h) / ratio.w) : longEdge;
   const evenWidth = Math.max(64, Math.round(width / 2) * 2);
   const evenHeight = Math.max(64, Math.round(height / 2) * 2);
-  return { width: evenWidth, height: evenHeight, size: `${evenWidth}x${evenHeight}` };
+  const minPixels = 921600;
+  if (evenWidth * evenHeight >= minPixels) {
+    return { width: evenWidth, height: evenHeight, size: `${evenWidth}x${evenHeight}` };
+  }
+  const scale = Math.sqrt(minPixels / (evenWidth * evenHeight));
+  const scaledWidth = Math.max(64, Math.ceil((evenWidth * scale) / 2) * 2);
+  const scaledHeight = Math.max(64, Math.ceil((evenHeight * scale) / 2) * 2);
+  return { width: scaledWidth, height: scaledHeight, size: `${scaledWidth}x${scaledHeight}` };
 }
 
 function isVideoAsset(data: CanvasNodeData) {

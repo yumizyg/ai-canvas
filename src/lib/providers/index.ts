@@ -9,7 +9,7 @@ export function getProviderAdapter(provider: Pick<ModelProvider, "slug" | "apiKe
     const key = provider.apiKeySecret || (provider.apiKeyEnv ? process.env[provider.apiKeyEnv] ?? "" : "");
     return new AliyunWanxProvider(key);
   }
-  if (provider.slug === "volcengine-seedream") {
+  if (provider.slug === "volcengine-seedream" || provider.slug === "volcengine-seedance") {
     const key = provider.apiKeySecret || (provider.apiKeyEnv ? process.env[provider.apiKeyEnv] ?? "" : "");
     return new VolcengineSeedreamProvider(key, provider.baseUrl || undefined);
   }

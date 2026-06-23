@@ -61,3 +61,11 @@
 - Fix: Allowed `videoGen` submissions, added Seedance video task handling in the Volcengine adapter/worker, and made Seedream submit `widthxheight` when canvas dimensions are set.
 - Prevention: For every model type exposed in the admin panel, verify there is a matching canvas action and provider worker path.
 - Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, `docker compose -p ai-canvas ps`, and `scripts\verify-local-prod.ps1`.
+
+## 2026-06-23 - Volcengine image size and Seedance provider routing failed
+
+- Symptom: Seedream rejected small custom sizes below 921600 pixels, and Seedance video jobs reported that video generation was not connected.
+- Cause: The Seedream adapter passed small `widthxheight` values directly, and the provider router only recognized `volcengine-seedream`, so `volcengine-seedance` fell back to the mock adapter.
+- Fix: Clamp Seedream custom sizes to at least 921600 pixels, route `volcengine-seedance` to the Volcengine adapter, and normalize Seedance model IDs to dated endpoint IDs.
+- Prevention: Provider routers must include every admin preset slug, and provider-side size validation should mirror upstream minimums.
+- Verification: `npx tsc --noEmit`, `npm test`, Docker rebuild, and `docker compose -p ai-canvas ps`.

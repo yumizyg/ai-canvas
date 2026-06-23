@@ -164,11 +164,31 @@ export class VolcengineSeedreamProvider implements ModelProviderAdapter {
 }
 
 function normalizeSeedreamSize(params: GenerateImageParams) {
-  if (params.width && params.height) return `${params.width}x${params.height}`;
+  if (params.width && params.height) {
+    const size = ensureSeedreamMinimumPixels(params.width, params.height);
+    return `${size.width}x${size.height}`;
+  }
   const size = params.size;
-  if (/^\d+x\d+$/i.test(size)) return size;
+  const match = size.match(/^(\d+)x(\d+)$/i);
+  if (match) {
+    const normalized = ensureSeedreamMinimumPixels(Number(match[1]), Number(match[2]));
+    return `${normalized.width}x${normalized.height}`;
+  }
   if (size === "1K" || size === "2K" || size === "4K") return size;
   return "2K";
+}
+
+function ensureSeedreamMinimumPixels(width: number, height: number) {
+  const minPixels = 921600;
+  const safeWidth = Math.max(64, Math.round(width / 2) * 2);
+  const safeHeight = Math.max(64, Math.round(height / 2) * 2);
+  if (safeWidth * safeHeight >= minPixels) {
+    return { width: safeWidth, height: safeHeight };
+  }
+  const scale = Math.sqrt(minPixels / (safeWidth * safeHeight));
+  const nextWidth = Math.max(64, Math.ceil((safeWidth * scale) / 2) * 2);
+  const nextHeight = Math.max(64, Math.ceil((safeHeight * scale) / 2) * 2);
+  return nextWidth * nextHeight >= minPixels ? { width: nextWidth, height: nextHeight } : { width: nextWidth + 2, height: nextHeight + 2 };
 }
 
 function extractVideoUrl(json: VolcengineTaskStatusResponse) {
@@ -220,14 +240,16 @@ export function normalizeSeedanceModelId(modelSlug?: string) {
   const value = (modelSlug ?? "").trim();
   const normalized = value.toLowerCase().replace(/[\s_.]+/g, "-");
   const aliases: Record<string, string> = {
-    "doubao-seedance-1-5-pro": "doubao-seedance-1-5-pro",
-    "seedance-1-5-pro": "doubao-seedance-1-5-pro",
-    "seedance-1-5": "doubao-seedance-1-5-pro",
-    "seedance-1.5-pro": "doubao-seedance-1-5-pro",
-    "doubao-seedance-1-0-pro": "doubao-seedance-1-0-pro",
-    "seedance-1-0-pro": "doubao-seedance-1-0-pro",
-    "seedance-1-0": "doubao-seedance-1-0-pro",
-    "seedance-1.0-pro": "doubao-seedance-1-0-pro"
+    "doubao-seedance-1-5-pro": "doubao-seedance-1-5-pro-251215",
+    "doubao-seedance-1-5-pro-251215": "doubao-seedance-1-5-pro-251215",
+    "seedance-1-5-pro": "doubao-seedance-1-5-pro-251215",
+    "seedance-1-5": "doubao-seedance-1-5-pro-251215",
+    "seedance-1.5-pro": "doubao-seedance-1-5-pro-251215",
+    "doubao-seedance-1-0-pro": "doubao-seedance-1-0-pro-250528",
+    "doubao-seedance-1-0-pro-250528": "doubao-seedance-1-0-pro-250528",
+    "seedance-1-0-pro": "doubao-seedance-1-0-pro-250528",
+    "seedance-1-0": "doubao-seedance-1-0-pro-250528",
+    "seedance-1.0-pro": "doubao-seedance-1-0-pro-250528"
   };
   return aliases[normalized] ?? value;
 }

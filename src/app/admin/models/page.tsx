@@ -30,8 +30,8 @@ const seedreamOptions = [
   { label: "展示名自动转换 Doubao-Seedream-4.0", value: "Doubao-Seedream-4.0" }
 ];
 const seedanceOptions = [
-  { label: "Seedance 1.5 Pro", value: "doubao-seedance-1-5-pro" },
-  { label: "Seedance 1.0 Pro", value: "doubao-seedance-1-0-pro" }
+  { label: "Seedance 1.5 Pro 推荐", value: "doubao-seedance-1-5-pro-251215" },
+  { label: "Seedance 1.0 Pro 推荐", value: "doubao-seedance-1-0-pro-250528" }
 ];
 const recommendedSeedreamModel = seedreamOptions[0].value;
 const recommendedSeedanceModel = seedanceOptions[0].value;
