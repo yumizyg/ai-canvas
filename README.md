@@ -12,7 +12,8 @@
 - 可部署工程化：Docker Compose 一键启动 Next.js、PostgreSQL、Redis 和 Worker。
 - 子路径部署：支持挂到已有简历网站 `/ai-canvas` 下，不接管主域名首页。
 
-  <img width="1280" height="762" alt="PixPin_2026-06-24_11-51-11" src="https://github.com/user-attachments/assets/b9cabf8e-3396-4381-8cdf-378d5d8303f5" />
+ <img width="2560" height="1523" alt="PixPin_2026-06-24_11-51-11" src="https://github.com/user-attachments/assets/e0b902fd-f51a-42b1-acaa-560de6e1cd69" />
+
 
 ## 技术栈
 
@@ -74,7 +75,8 @@ PostgreSQL <----> Redis / BullMQ
 - 预览和下载生成图片/视频
 - 保存画布并刷新恢复
 
-  <img width="1280" height="763" alt="PixPin_2026-06-24_11-51-35" src="https://github.com/user-attachments/assets/a263f214-3512-4bea-b95a-50972240d831" />
+<img width="2560" height="1526" alt="PixPin_2026-06-24_11-51-35" src="https://github.com/user-attachments/assets/14f3f1e0-06a9-49c7-bdc4-f043b66c1f85" />
+
 
 
 ### 管理员端
@@ -98,7 +100,8 @@ PostgreSQL <----> Redis / BullMQ
 - `generation_jobs`：生成任务、参数快照、状态、错误信息
 - `assets`：图片/视频文件路径、尺寸、来源任务
 
-  <img width="1280" height="763" alt="PixPin_2026-06-24_11-51-26" src="https://github.com/user-attachments/assets/3268c55f-004d-4318-adbb-7ae7220e4928" />
+<img width="2560" height="1525" alt="PixPin_2026-06-24_11-51-26" src="https://github.com/user-attachments/assets/53fa5a79-de14-4855-9f85-15c39d382704" />
+
 
 
 ## 本地开发
