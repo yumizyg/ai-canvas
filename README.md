@@ -2,12 +2,6 @@
 
 企业内部 AI 画布生成平台。项目面向设计、运营、产品等团队，把图片生成、视频生成、提示词传参、参考图复用和素材下载整合到一个可视化画布里，让成员不用理解复杂 API，也能通过节点和连线完成 AIGC 素材生产。
 
-默认部署路径支持作为个人简历站的子页面使用：
-
-```text
-https://www.yumiprogram.online/ai-canvas
-```
-
 ## 项目亮点
 
 - 画布化 AIGC 工作流：基于 React Flow 实现提示词节点、生图节点、视频节点、素材节点、输出节点和节点连线。
@@ -17,6 +11,8 @@ https://www.yumiprogram.online/ai-canvas
 - 参考图传参：上游图片可以通过连线传给下游图片/视频节点，Worker 会将本地素材转成可提交给模型的输入。
 - 可部署工程化：Docker Compose 一键启动 Next.js、PostgreSQL、Redis 和 Worker。
 - 子路径部署：支持挂到已有简历网站 `/ai-canvas` 下，不接管主域名首页。
+
+  <img width="1280" height="762" alt="PixPin_2026-06-24_11-51-11" src="https://github.com/user-attachments/assets/b9cabf8e-3396-4381-8cdf-378d5d8303f5" />
 
 ## 技术栈
 
@@ -78,6 +74,9 @@ PostgreSQL <----> Redis / BullMQ
 - 预览和下载生成图片/视频
 - 保存画布并刷新恢复
 
+  <img width="1280" height="763" alt="PixPin_2026-06-24_11-51-35" src="https://github.com/user-attachments/assets/a263f214-3512-4bea-b95a-50972240d831" />
+
+
 ### 管理员端
 
 - 配置火山引擎 Seedream 图片模型
@@ -98,6 +97,9 @@ PostgreSQL <----> Redis / BullMQ
 - `canvas_edges`：节点连线和端口信息
 - `generation_jobs`：生成任务、参数快照、状态、错误信息
 - `assets`：图片/视频文件路径、尺寸、来源任务
+
+  <img width="1280" height="763" alt="PixPin_2026-06-24_11-51-26" src="https://github.com/user-attachments/assets/3268c55f-004d-4318-adbb-7ae7220e4928" />
+
 
 ## 本地开发
 
